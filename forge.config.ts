@@ -28,12 +28,12 @@ const config: ForgeConfig = {
     new MakerDeb({
       options: {
         maintainer: 'Paulem79',
-        homepage: 'https://github.com/Paulem79/deezer-youtube-downloader',
+        homepage: 'https://github.com/Paulem79/deezer-yt-download',
       },
     }),
     new MakerRpm({
       options: {
-        homepage: 'https://github.com/Paulem79/deezer-youtube-downloader',
+        homepage: 'https://github.com/Paulem79/deezer-yt-download',
       },
     }),
   ],
@@ -41,7 +41,7 @@ const config: ForgeConfig = {
     new PublisherGithub({
       repository: {
         owner: 'Paulem79',
-        name: 'deezer-youtube-downloader',
+        name: 'deezer-yt-download',
       },
       prerelease: true,
     }),
