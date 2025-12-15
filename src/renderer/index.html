@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data:;">
+    <title>Deezer → YouTube Downloader</title>
+</head>
+<body>
+<div id="app">
+    <!-- Header -->
+    <header class="header">
+        <div class="header-drag-region"></div>
+        <h1>🎵 Deezer → YouTube Downloader</h1>
+        <button id="settingsBtn" class="icon-btn" title="Paramètres">⚙️</button>
+    </header>
+
+    <!-- Dependency Warning -->
+    <div id="dependencyWarning" class="warning hidden">
+        <span class="warning-icon">⚠️</span>
+        <span id="dependencyMessage"></span>
+        <a href="https://github.com/yt-dlp/yt-dlp#installation" target="_blank">Installation yt-dlp</a>
+    </div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Input Section -->
+        <section class="input-section">
+            <div class="input-group">
+                <label for="playlistUrl">URL de la playlist Deezer</label>
+                <div class="input-row">
+                    <input
+                            type="text"
+                            id="playlistUrl"
+                            placeholder="https://www.deezer.com/playlist/123456789"
+                    />
+                    <button id="loadPlaylistBtn" class="primary-btn">
+                        Charger
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Playlist Info -->
+        <section id="playlistInfo" class="playlist-info hidden">
+            <img id="playlistCover" src="" alt="Cover" />
+            <div class="playlist-details">
+                <h2 id="playlistTitle"></h2>
+                <p id="playlistDescription"></p>
+                <span id="playlistTrackCount" class="track-count"></span>
+            </div>
+            <div class="playlist-actions">
+                <button id="searchAllBtn" class="secondary-btn">
+                    🔍 Rechercher sur YouTube
+                </button>
+                <button id="downloadAllBtn" class="primary-btn" disabled>
+                    📥 Tout télécharger
+                </button>
+            </div>
+        </section>
+
+        <!-- Progress Section -->
+        <section id="progressSection" class="progress-section hidden">
+            <div class="progress-header">
+                <h3>Progression Totale</h3>
+                <span id="overallProgressText">0/0</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="overallProgressBar" class="progress-bar"></div>
+            </div>
+
+            <div class="progress-header" style="margin-top: 1rem;">
+                <h3>Téléchargement en cours</h3>
+                <span id="progressCount">0%</span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="progressBar" class="progress-bar"></div>
+            </div>
+            <button id="cancelBtn" class="danger-btn hidden">Annuler</button>
+        </section>
+
+        <!-- Track List -->
+        <section id="trackList" class="track-list hidden">
+            <div class="track-list-header">
+          <span class="col-check">
+            <input type="checkbox" id="selectAll" checked />
+          </span>
+                <span class="col-title">Titre</span>
+                <span class="col-artist">Artiste</span>
+                <span class="col-youtube">YouTube</span>
+                <span class="col-status">Status</span>
+            </div>
+            <div id="trackListBody" class="track-list-body"></div>
+        </section>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Paramètres</h2>
+                <button id="closeSettingsBtn" class="icon-btn">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="setting-group">
+                    <label for="outputDir">Dossier de téléchargement</label>
+                    <div class="input-row">
+                        <input type="text" id="outputDir" readonly />
+                        <button id="selectFolderBtn" class="secondary-btn">
+                            Parcourir
+                        </button>
+                    </div>
+                </div>
+                <div class="setting-group">
+                    <label for="formatSelect">Format</label>
+                    <select id="formatSelect">
+                        <option value="mp3">MP3 (Audio)</option>
+                        <option value="mp4">MP4 (Vidéo)</option>
+                        <option value="best">Meilleure qualité</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label for="qualitySelect">Qualité audio</label>
+                    <select id="qualitySelect">
+                        <option value="0">Meilleure (320kbps)</option>
+                        <option value="2">Haute (192kbps)</option>
+                        <option value="5">Moyenne (128kbps)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="openOutputFolderBtn" class="secondary-btn">
+                    📂 Ouvrir le dossier
+                </button>
+                <button id="saveSettingsBtn" class="primary-btn">
+                    Sauvegarder
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
