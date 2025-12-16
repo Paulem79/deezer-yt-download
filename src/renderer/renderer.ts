@@ -414,12 +414,11 @@ async function downloadSelectedTracks() {
             track.status = 'error';
             updateTrackStatus(track);
             updateOverallProgress();
-            throw error;
         });
     });
 
-    const results = await Promise.allSettled(downloadPromises);
-    const failed = results.filter((result) => result.status === 'rejected').length;
+    await Promise.allSettled(downloadPromises);
+    const failed = tracksToDownload.filter((track) => track.status === 'error').length;
     if (failed > 0) {
         console.error(`Téléchargements échoués: ${failed}`);
     }

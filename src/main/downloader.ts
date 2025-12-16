@@ -121,7 +121,7 @@ export class Downloader {
 
       let outputFile = '';
 
-      childProcess.stdout?.on('data', (data:  Buffer) => {
+      childProcess.stdout?.on('data', (data: Buffer) => {
         const output = data.toString();
         
         // Parser la progression
