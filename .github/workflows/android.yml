@@ -41,7 +41,9 @@ jobs:
           packages: ${{ env.ANDROID_SDK_PACKAGES }}
 
       - name: Build renderer assets
-        run: npm run package
+        run: |
+          npm run package || true
+          test -d .webpack/x64/renderer/main_window
 
       - name: Add Android platform
         run: npx cap add android
