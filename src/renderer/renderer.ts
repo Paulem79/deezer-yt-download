@@ -1,40 +1,45 @@
 import './styles.css';
+import type { ElectronAPI } from '../preload';
 
 // CSS is now inline in index.html
 
-interface ElectronAPI {
-    deezer: {
-        getPlaylist: (url: string) => Promise<any>;
-    };
-    youtube: {
-        search: (title: string, artist: string) => Promise<any>;
-        searchBatch: (tracks: Array<{ title: string; artist: string }>) => Promise<any>;
-    };
-    download: {
-        video: (url: string, title: string, artist: string, options: any) => Promise<any>;
-        cancel: () => Promise<any>;
-        onProgress: (callback: (progress:  any) => void) => void;
-    };
-    check: {
-        dependencies: () => Promise<{ ytDlp: boolean; ffmpeg: boolean }>;
-    };
-    dialog: {
-        selectFolder: () => Promise<string | null>;
-    };
-    shell: {
-        openFolder: (path: string) => Promise<void>;
-    };
-    settings: {
-        get: (key: string) => Promise<any>;
-        set: (key: string, value: any) => Promise<void>;
-        getAll: () => Promise<any>;
-    };
-}
-
 declare global {
     interface Window {
-        electronAPI: ElectronAPI;
+        // Exposed by preload; optional for non-Electron/mobile builds.
+        electronAPI?: ElectronAPI;
     }
+}
+
+const electronAPI = window.electronAPI;
+
+const UNSUPPORTED_MESSAGES = {
+    en: 'This build requires the desktop Electron app to run.',
+    fr: 'Cette version nécessite l’environnement Electron pour fonctionner.',
+};
+
+function renderUnsupportedEnvironment() {
+    const container = document.getElementById('app') ?? document.body;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'unsupported-wrapper';
+
+    const title = document.createElement('h1');
+    title.textContent = 'Deezer YouTube Downloader';
+
+    const englishMessage = document.createElement('p');
+    englishMessage.textContent = UNSUPPORTED_MESSAGES.en;
+
+    const frenchMessage = document.createElement('p');
+    frenchMessage.textContent = UNSUPPORTED_MESSAGES.fr;
+
+    wrapper.append(title, englishMessage, frenchMessage);
+    container.replaceChildren(wrapper);
+}
+
+function assertElectronAPI(): ElectronAPI {
+    if (!electronAPI) {
+        throw new Error('Electron API unavailable');
+    }
+    return electronAPI;
 }
 
 interface Track {
@@ -102,6 +107,11 @@ const elements = {
 
 // Initialize
 async function init() {
+    if (!electronAPI) {
+        console.warn('Electron API unavailable. Stopping initialization.');
+        renderUnsupportedEnvironment();
+        return;
+    }
     console.log('init() started');
     await loadSettings();
     await checkDependencies();
@@ -113,7 +123,7 @@ async function init() {
 async function loadSettings() {
     console.log('loadSettings() called');
     try {
-        const savedSettings = await window.electronAPI.settings.getAll();
+        const savedSettings = await assertElectronAPI().settings.getAll();
         console.log('savedSettings:', savedSettings);
         settings = { ...settings, ...savedSettings };
         elements.outputDir.value = settings.outputDir;
@@ -125,7 +135,7 @@ async function loadSettings() {
 }
 
 async function checkDependencies() {
-    const deps = await window.electronAPI.check.dependencies();
+    const deps = await assertElectronAPI().check.dependencies();
 
     if (!deps.ytDlp || !deps.ffmpeg) {
         const missing = [];
@@ -171,7 +181,7 @@ function setupEventListeners() {
     elements.selectFolderBtn.addEventListener('click', selectOutputFolder);
     elements.saveSettingsBtn.addEventListener('click', saveSettings);
     elements.openOutputFolderBtn.addEventListener('click', () => {
-        window.electronAPI.shell.openFolder(settings.outputDir);
+        assertElectronAPI().shell.openFolder(settings.outputDir);
     });
 
     // Close modal on outside click
@@ -183,7 +193,7 @@ function setupEventListeners() {
 }
 
 function setupProgressListener() {
-    window.electronAPI.download.onProgress((progress) => {
+    assertElectronAPI().download.onProgress((progress) => {
         if (! currentPlaylist) return;
 
         const track = currentPlaylist.tracks.find(
@@ -210,7 +220,7 @@ async function loadPlaylist() {
 
     try {
         console.log('Calling electronAPI.deezer.getPlaylist...');
-        const result = await window.electronAPI.deezer.getPlaylist(url);
+        const result = await assertElectronAPI().deezer.getPlaylist(url);
         console.log('Result:', result);
 
         if (!result.success) {
@@ -344,7 +354,7 @@ async function searchAllTracks() {
         updateTrackStatus(track);
 
         try {
-            const result = await window.electronAPI.youtube.search(track.title, track.artist);
+            const result = await assertElectronAPI().youtube.search(track.title, track.artist);
 
             if (result.success && result.data) {
                 track.youtubeUrl = result.data.url;
@@ -395,7 +405,7 @@ async function downloadSelectedTracks() {
 
     for (const track of tracksToDownload) {
         try {
-            await window.electronAPI.download.video(
+            await assertElectronAPI().download.video(
                 track.youtubeUrl!,
                 track.title,
                 track.artist,
@@ -439,7 +449,7 @@ function updateOverallProgress() {
 
 async function cancelDownload() {
     try {
-        await window.electronAPI.download.cancel();
+        await assertElectronAPI().download.cancel();
         elements.cancelBtn.classList.add('hidden');
         elements.downloadAllBtn.disabled = false;
         elements.searchAllBtn.disabled = false;
@@ -449,7 +459,7 @@ async function cancelDownload() {
 }
 
 async function selectOutputFolder() {
-    const folder = await window.electronAPI.dialog.selectFolder();
+    const folder = await assertElectronAPI().dialog.selectFolder();
     if (folder) {
         settings.outputDir = folder;
         elements.outputDir.value = folder;
@@ -460,9 +470,9 @@ async function saveSettings() {
     settings.format = elements.formatSelect.value as 'mp3' | 'mp4';
     settings.quality = elements.qualitySelect.value as 'best' | 'worst';
 
-    await window.electronAPI.settings.set('outputDir', settings.outputDir);
-    await window.electronAPI.settings.set('format', settings.format);
-    await window.electronAPI.settings.set('quality', settings.quality);
+    await assertElectronAPI().settings.set('outputDir', settings.outputDir);
+    await assertElectronAPI().settings.set('format', settings.format);
+    await assertElectronAPI().settings.set('quality', settings.quality);
 
     elements.settingsModal.classList.add('hidden');
 }
