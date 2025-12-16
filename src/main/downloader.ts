@@ -48,7 +48,7 @@ export class Downloader {
   /**
    * Configure les chemins des binaires
    */
-  static setPaths(ytDlpPath?:  string, ffmpegPath?: string): void {
+  static setPaths(ytDlpPath?: string, ffmpegPath?: string): void {
     if (ytDlpPath) this.ytDlpPath = ytDlpPath;
     if (ffmpegPath) this.ffmpegPath = ffmpegPath;
   }
@@ -68,7 +68,7 @@ export class Downloader {
     
     // Créer le dossier de sortie s'il n'existe pas
     if (!fs.existsSync(options.outputDir)) {
-      fs.mkdirSync(options. outputDir, { recursive: true });
+      fs.mkdirSync(options.outputDir, { recursive: true });
     }
 
     const outputTemplate = path.join(
@@ -76,7 +76,7 @@ export class Downloader {
       `${sanitizedTitle}.%(ext)s`
     );
 
-    const args:  string[] = [
+    const args: string[] = [
       url,
       '-o', outputTemplate,
       '--no-playlist',
@@ -111,7 +111,7 @@ export class Downloader {
     return new Promise((resolve, reject) => {
       onProgress({
         videoId,
-        title:  `${artist} - ${title}`,
+        title: `${artist} - ${title}`,
         progress: 0,
         status: 'downloading',
       });
@@ -139,7 +139,7 @@ export class Downloader {
         // Capturer le nom du fichier de sortie
         const destMatch = output.match(/\[.*\] Destination: (.+)/);
         if (destMatch) {
-          outputFile = destMatch[1]. trim();
+          outputFile = destMatch[1].trim();
         }
 
         const mergerMatch = output.match(/\[Merger\] Merging formats into "(.+)"/);
@@ -169,7 +169,7 @@ export class Downloader {
             title: `${artist} - ${title}`,
             progress: 100,
             status: 'completed',
-            filePath:  finalPath,
+            filePath: finalPath,
           });
           
           resolve(finalPath);

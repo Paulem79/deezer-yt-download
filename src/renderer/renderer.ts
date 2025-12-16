@@ -421,7 +421,6 @@ async function downloadSelectedTracks() {
     if (failed > 0) {
         console.error(`Téléchargements échoués: ${failed}`);
     }
-    updateOverallProgress();
 
     elements.cancelBtn.classList.add('hidden');
     elements.downloadAllBtn.disabled = false;
