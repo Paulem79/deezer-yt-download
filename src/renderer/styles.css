@@ -456,3 +456,15 @@ button {
 .loading {
     animation: spin 1s linear infinite;
 }
+
+.unsupported-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+    text-align: center;
+}

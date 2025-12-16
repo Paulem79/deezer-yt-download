@@ -7,9 +7,14 @@ on:
     branches: [main, master]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   build-android:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_SDK_PACKAGES: "platforms;android-34 build-tools;34.0.0"
 
     steps:
       - name: Checkout code
@@ -31,12 +36,9 @@ jobs:
           java-version: 17
 
       - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v3.2.2 # Pinned to latest v3 line for reproducibility
         with:
-          api-level: 34
-
-      - name: Install Capacitor tooling
-        run: npm install --no-save @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
+          packages: ${{ env.ANDROID_SDK_PACKAGES }}
 
       - name: Build renderer assets
         run: npm run package
