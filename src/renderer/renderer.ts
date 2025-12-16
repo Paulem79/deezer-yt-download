@@ -414,7 +414,7 @@ async function downloadSelectedTracks() {
             track.status = 'error';
             updateTrackStatus(track);
             updateOverallProgress();
-            return Promise.reject(error);
+            throw error;
         });
     });
 
