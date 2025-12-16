@@ -55,13 +55,22 @@ export class DeezerService {
       const playlistData = playlistResponse.data;
       const tracks: DeezerTrack[] = [];
 
-      // Récupérer tous les tracks (gestion de la pagination)
-      let tracksUrl = `${DEEZER_API_BASE}/playlist/${playlistId}/tracks?limit=100`;
+      // Récupérer tous les tracks (gestion de la pagination) en parallèle
+      const limit = 100;
+      const pageCount = Math.max(
+        1,
+        Math.ceil((playlistData.nb_tracks || 0) / limit)
+      );
 
-      console.log(tracksUrl)
+      const trackRequests = Array.from({ length: pageCount }, (_, index) =>
+        axios.get(
+          `${DEEZER_API_BASE}/playlist/${playlistId}/tracks?limit=${limit}&index=${index * limit}`
+        )
+      );
 
-      while (tracksUrl) {
-        const tracksResponse = await axios.get(tracksUrl);
+      const trackResponses = await Promise.all(trackRequests);
+
+      for (const tracksResponse of trackResponses) {
         const tracksData = tracksResponse.data;
 
         for (const track of tracksData.data) {
@@ -73,8 +82,6 @@ export class DeezerService {
             duration: track.duration,
           });
         }
-
-        tracksUrl = tracksData.next || null;
       }
 
       return {

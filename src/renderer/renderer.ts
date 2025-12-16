@@ -390,32 +390,42 @@ async function downloadSelectedTracks() {
     elements.downloadAllBtn.disabled = true;
     elements.searchAllBtn.disabled = true;
 
-    let completed = 0;
-    const total = tracksToDownload.length;
+    const downloadPromises = tracksToDownload.map((track) => {
+        track.status = 'downloading';
+        updateTrackStatus(track);
 
-    for (const track of tracksToDownload) {
-        try {
-            await window.electronAPI.download.video(
-                track.youtubeUrl!,
-                track.title,
-                track.artist,
-                {
-                    outputDir: settings.outputDir,
-                    format: settings.format,
-                    quality: settings.quality,
-                }
-            );
-            completed++;
-        } catch (error) {
+        return window.electronAPI.download.video(
+            track.youtubeUrl!,
+            track.title,
+            track.artist,
+            {
+                outputDir: settings.outputDir,
+                format: settings.format,
+                quality: settings.quality,
+            }
+        ).then(() => {
+            track.status = 'completed';
+            track.progress = 100;
+            updateTrackStatus(track);
+        }).catch((error) => {
             console.error(`Erreur téléchargement ${track.title}:`, error);
-        }
+            track.status = 'error';
+            updateTrackStatus(track);
+        });
+    });
 
-        updateOverallProgress();
+    updateOverallProgress();
+
+    await Promise.allSettled(downloadPromises);
+    const failed = tracksToDownload.filter((track) => track.status === 'error').length;
+    if (failed > 0) {
+        console.error(`Téléchargements échoués: ${failed}`);
     }
 
     elements.cancelBtn.classList.add('hidden');
     elements.downloadAllBtn.disabled = false;
     elements.searchAllBtn.disabled = false;
+    updateOverallProgress();
 }
 
 function updateOverallProgress() {
