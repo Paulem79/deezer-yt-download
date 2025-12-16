@@ -62,7 +62,7 @@ export class DeezerService {
         Math.ceil((playlistData.nb_tracks || 0) / limit)
       );
 
-      const trackRequests = Array.from({ length: pageCount }, (_value, index) =>
+      const trackRequests = Array.from({ length: pageCount }, (_, index) =>
         axios.get(
           `${DEEZER_API_BASE}/playlist/${playlistId}/tracks?limit=${limit}&index=${index * limit}`
         )

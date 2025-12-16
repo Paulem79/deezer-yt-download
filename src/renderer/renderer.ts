@@ -393,7 +393,6 @@ async function downloadSelectedTracks() {
     const downloadPromises = tracksToDownload.map((track) => {
         track.status = 'downloading';
         updateTrackStatus(track);
-        updateOverallProgress();
 
         return window.electronAPI.download.video(
             track.youtubeUrl!,
@@ -408,20 +407,21 @@ async function downloadSelectedTracks() {
             track.status = 'completed';
             track.progress = 100;
             updateTrackStatus(track);
-            updateOverallProgress();
         }).catch((error) => {
             console.error(`Erreur téléchargement ${track.title}:`, error);
             track.status = 'error';
             updateTrackStatus(track);
-            updateOverallProgress();
         });
     });
+
+    updateOverallProgress();
 
     await Promise.allSettled(downloadPromises);
     const failed = tracksToDownload.filter((track) => track.status === 'error').length;
     if (failed > 0) {
         console.error(`Téléchargements échoués: ${failed}`);
     }
+    updateOverallProgress();
 
     elements.cancelBtn.classList.add('hidden');
     elements.downloadAllBtn.disabled = false;

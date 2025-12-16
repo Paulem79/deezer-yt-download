@@ -205,7 +205,11 @@ export class Downloader {
    */
   cancel(): void {
     this.processes.forEach((process) => {
-      process.kill('SIGTERM');
+      try {
+        process.kill('SIGTERM');
+      } catch (error) {
+        console.error('Erreur lors de l\'arrêt du téléchargement:', error);
+      }
     });
     this.processes.clear();
   }
