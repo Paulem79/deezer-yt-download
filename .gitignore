@@ -1,6 +1,7 @@
 bin
 .idea
 .webpack
+android
 
 ### Node template
 # Logs
@@ -132,4 +133,3 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
-

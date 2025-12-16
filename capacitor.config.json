@@ -1,0 +1,9 @@
+{
+  "appId": "com.paulem.deezerytdownloader",
+  "appName": "DeezerYouTubeDownloader",
+  "webDir": ".webpack/renderer/main_window",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  }
+}

@@ -37,6 +37,16 @@ declare global {
     }
 }
 
+function renderUnsupportedEnvironment() {
+    const container = document.getElementById('app') ?? document.body;
+    container.innerHTML = `
+      <div style="display:flex;flex-direction:column;gap:12px;align-items:center;justify-content:center;min-height:100vh;padding:24px;font-family:Inter, system-ui, -apple-system, sans-serif;text-align:center;">
+        <h1>Deezer YouTube Downloader</h1>
+        <p>Cette version nécessite l'environnement Electron pour fonctionner. Veuillez utiliser l'application de bureau.</p>
+      </div>
+    `;
+}
+
 interface Track {
     id: number;
     title: string;
@@ -103,6 +113,11 @@ const elements = {
 // Initialize
 async function init() {
     console.log('init() started');
+    if (!(window as any).electronAPI) {
+        console.warn('Electron API non disponible. Arrêt de l\'initialisation.');
+        renderUnsupportedEnvironment();
+        return;
+    }
     await loadSettings();
     await checkDependencies();
     setupEventListeners();
