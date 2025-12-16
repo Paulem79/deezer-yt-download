@@ -404,7 +404,12 @@ async function downloadSelectedTracks() {
                 format: settings.format,
                 quality: settings.quality,
             }
-        ).catch((error) => {
+        ).then(() => {
+            track.status = 'completed';
+            track.progress = 100;
+            updateTrackStatus(track);
+            updateOverallProgress();
+        }).catch((error) => {
             console.error(`Erreur téléchargement ${track.title}:`, error);
             track.status = 'error';
             updateTrackStatus(track);
