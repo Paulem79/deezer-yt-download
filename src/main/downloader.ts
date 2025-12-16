@@ -21,7 +21,7 @@ export interface DownloadOptions {
 export class Downloader {
   private static ytDlpPath: string = 'yt-dlp';
   private static ffmpegPath: string = 'ffmpeg';
-  private currentProcess: ChildProcess | null = null;
+  private processes: Map<string, ChildProcess> = new Map();
 
   /**
    * Vérifie si yt-dlp est installé
@@ -116,11 +116,12 @@ export class Downloader {
         status: 'downloading',
       });
 
-      this.currentProcess = spawn(Downloader.ytDlpPath, args);
+      const childProcess = spawn(Downloader.ytDlpPath, args);
+      this.processes.set(videoId, childProcess);
 
       let outputFile = '';
 
-      this.currentProcess.stdout?. on('data', (data:  Buffer) => {
+      childProcess.stdout?. on('data', (data:  Buffer) => {
         const output = data.toString();
         
         // Parser la progression
@@ -147,12 +148,12 @@ export class Downloader {
         }
       });
 
-      this.currentProcess.stderr?.on('data', (data: Buffer) => {
+      childProcess.stderr?.on('data', (data: Buffer) => {
         console.error('yt-dlp stderr:', data.toString());
       });
 
-      this.currentProcess.on('close', (code) => {
-        this.currentProcess = null;
+      childProcess.on('close', (code) => {
+        this.processes.delete(videoId);
         
         if (code === 0) {
           // Trouver le fichier téléchargé
@@ -185,8 +186,8 @@ export class Downloader {
         }
       });
 
-      this.currentProcess.on('error', (error) => {
-        this.currentProcess = null;
+      childProcess.on('error', (error) => {
+        this.processes.delete(videoId);
         onProgress({
           videoId,
           title: `${artist} - ${title}`,
@@ -203,10 +204,10 @@ export class Downloader {
    * Annule le téléchargement en cours
    */
   cancel(): void {
-    if (this.currentProcess) {
-      this.currentProcess.kill('SIGTERM');
-      this.currentProcess = null;
-    }
+    this.processes.forEach((process) => {
+      process.kill('SIGTERM');
+    });
+    this.processes.clear();
   }
 
   /**
