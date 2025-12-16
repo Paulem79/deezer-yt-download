@@ -414,10 +414,15 @@ async function downloadSelectedTracks() {
             track.status = 'error';
             updateTrackStatus(track);
             updateOverallProgress();
+            return Promise.reject(error);
         });
     });
 
-    await Promise.allSettled(downloadPromises);
+    const results = await Promise.allSettled(downloadPromises);
+    const failed = results.filter((result) => result.status === 'rejected').length;
+    if (failed > 0) {
+        console.error(`Téléchargements échoués: ${failed}`);
+    }
 
     elements.cancelBtn.classList.add('hidden');
     elements.downloadAllBtn.disabled = false;
